@@ -11,7 +11,7 @@ public class UniversitySystem {
     private static final int STUDENT_ID_MAX = 1999;
     private static final int TEACHER_ID_MIN = 2000;
     private static final int TEACHER_ID_MAX = 2999;
-   
+
     private static final int COURSE_ID_MIN = 100;
     private static final int COURSE_ID_MAX = 499;
 
