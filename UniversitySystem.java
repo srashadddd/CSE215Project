@@ -7,6 +7,16 @@ public class UniversitySystem {
     private ArrayList<UserAccount> accounts;
     private FileManager fm;
 
+    private static final int STUDENT_ID_MIN = 1000;
+    private static final int STUDENT_ID_MAX = 1999;
+    private static final int TEACHER_ID_MIN = 2000;
+    private static final int TEACHER_ID_MAX = 2999;
+   
+    private static final int COURSE_ID_MIN = 100;
+    private static final int COURSE_ID_MAX = 499;
+
+    private static final int USERNAME_MIN_LENGTH = 4;
+
     public UniversitySystem() {
         fm = new FileManager();
         students = fm.loadStudents();
@@ -27,6 +37,22 @@ public class UniversitySystem {
                 }
             }
         }
+    }
+
+    public boolean isStudentIdTaken(int id) { return getStudentById(id) != null; }
+    public boolean isTeacherIdTaken(int id) { return getTeacherById(id) != null; }
+    public boolean isCourseIdTaken(int id) { return getCourseById(id) != null; }
+    public boolean isUsernameTaken(String username) { return getAccountByUsername(username) != null; }
+
+    public boolean isStudentIdInRange(int id) { return id >= STUDENT_ID_MIN && id <= STUDENT_ID_MAX; }
+    public boolean isTeacherIdInRange(int id) { return id >= TEACHER_ID_MIN && id <= TEACHER_ID_MAX; }
+    public boolean isCourseIdInRange(int id) { return id >= COURSE_ID_MIN && id <= COURSE_ID_MAX; }
+
+    public boolean isUsernameValid(String username) {
+        if (username == null) return false;
+        if (username.length() < USERNAME_MIN_LENGTH) return false;
+        if (username.contains(" ")) return false;
+        return true;
     }
 
     public boolean addStudentWithAccount(Student s, String username, String password) {
@@ -79,7 +105,6 @@ public class UniversitySystem {
 
     public void addCourse(Course c) {
         courses.add(c);
-
         Teacher t = getTeacherById(c.getTeacherId());
         if (t != null) t.assignCourseId(c.getCourseId());
         saveAll();
@@ -108,10 +133,8 @@ public class UniversitySystem {
     public boolean deleteStudentById(int id) {
         Student s = getStudentById(id);
         if (s == null) return false;
-
         for (Course c : courses) c.removeStudentId(id);
         students.remove(s);
-
         UserAccount accToRemove = null;
         for (UserAccount a : accounts) if (a.getRole().equals("student") && a.getLinkedId() == id) { accToRemove = a; break; }
         if (accToRemove != null) accounts.remove(accToRemove);
@@ -123,12 +146,14 @@ public class UniversitySystem {
         Teacher t = getTeacherById(id);
         if (t == null) return false;
 
-        for (Course c : courses) {
+        for (int i = 0; i < courses.size(); i++) {
+            Course c = courses.get(i);
             if (c.getTeacherId() == id) {
-                
+                Course replacement = new Course(c.getCourseId(), c.getCourseName(), c.getDepartment(), c.getCredit(), -1);
+                for (int sid : c.getStudentIds()) replacement.addStudentId(sid);
+                courses.set(i, replacement);
             }
         }
-        
         teachers.remove(t);
         UserAccount accToRemove = null;
         for (UserAccount a : accounts) if (a.getRole().equals("teacher") && a.getLinkedId() == id) { accToRemove = a; break; }
@@ -140,7 +165,6 @@ public class UniversitySystem {
     public boolean deleteCourseById(int id) {
         Course c = getCourseById(id);
         if (c == null) return false;
-
         for (Student s : students) s.dropCourseId(id);
         for (Teacher t : teachers) t.removeCourseId(id);
         courses.remove(c);
