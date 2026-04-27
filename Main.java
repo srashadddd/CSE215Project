@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -20,32 +19,40 @@ public class Main {
 
             if (opt == 1) {
                 System.out.print("Username: "); String uname = sc.nextLine().trim();
+                if (!uni.isUsernameValid(uname)) {
+                    System.out.println("Invalid username. Must be at least 4 characters and contain no spaces.");
+                    continue;
+                }
+                if (uni.isUsernameTaken(uname)) {
+                    System.out.println("Username already exists. Pick another username.");
+                    continue;
+                }
                 System.out.print("Password: "); String pass = sc.nextLine().trim();
                 System.out.print("Role (student/teacher/admin): "); String role = sc.nextLine().trim().toLowerCase();
                 if (role.equals("student")) {
-                    System.out.print("Student ID (integer): "); int id = readInt(sc);
+                    int id = readUniqueId(sc, uni, "student");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood Group: "); String blood = sc.nextLine();
                     Student s = new Student(id, name, email, blood);
                     boolean ok = uni.addStudentWithAccount(s, uname, pass);
                     if (ok) System.out.println("Student account created.");
-                    else System.out.println("Username already exists.");
+                    else System.out.println("Failed to create account (username may exist).");
                 } else if (role.equals("teacher")) {
-                    System.out.print("Teacher ID (integer): "); int id = readInt(sc);
+                    int id = readUniqueId(sc, uni, "teacher");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood Group: "); String blood = sc.nextLine();
-                    System.out.print("Salary (number): "); double sal = readDouble(sc);
+                    System.out.print("Salary: "); double sal = readDouble(sc);
                     System.out.print("Department: "); String dept = sc.nextLine();
                     Teacher t = new Teacher(id, name, email, blood, sal, dept);
                     boolean ok = uni.addTeacherWithAccount(t, uname, pass);
                     if (ok) System.out.println("Teacher account created.");
-                    else System.out.println("Username already exists.");
+                    else System.out.println("Failed to create account (username may exist).");
                 } else if (role.equals("admin")) {
                     boolean ok = uni.addAdminAccount(uname, pass);
                     if (ok) System.out.println("Admin account created.");
-                    else System.out.println("Username already exists.");
+                    else System.out.println("Failed to create account (username may exist).");
                 } else {
                     System.out.println("Invalid role.");
                 }
@@ -82,29 +89,33 @@ public class Main {
                 System.out.print("Choose: ");
                 int c = readInt(sc);
                 if (c == 1) {
-                    System.out.print("Student ID: "); int id = readInt(sc);
+                    int id = readUniqueId(sc, uni, "student");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood: "); String blood = sc.nextLine();
                     System.out.print("Username for student: "); String uname = sc.nextLine();
+                    if (!uni.isUsernameValid(uname)) { System.out.println("Invalid username. Must be at least 4 characters and contain no spaces."); continue; }
+                    if (uni.isUsernameTaken(uname)) { System.out.println("Username exists."); continue; }
                     System.out.print("Password: "); String pass = sc.nextLine();
                     Student s = new Student(id, name, email, blood);
                     if (uni.addStudentWithAccount(s, uname, pass)) System.out.println("Student added.");
                     else System.out.println("Username exists.");
                 } else if (c == 2) {
-                    System.out.print("Teacher ID: "); int id = readInt(sc);
+                    int id = readUniqueId(sc, uni, "teacher");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood: "); String blood = sc.nextLine();
                     System.out.print("Salary: "); double sal = readDouble(sc);
                     System.out.print("Dept: "); String dept = sc.nextLine();
                     System.out.print("Username for teacher: "); String uname = sc.nextLine();
+                    if (!uni.isUsernameValid(uname)) { System.out.println("Invalid username. Must be at least 4 characters and contain no spaces."); continue; }
+                    if (uni.isUsernameTaken(uname)) { System.out.println("Username exists."); continue; }
                     System.out.print("Password: "); String pass = sc.nextLine();
                     Teacher t = new Teacher(id, name, email, blood, sal, dept);
                     if (uni.addTeacherWithAccount(t, uname, pass)) System.out.println("Teacher added.");
                     else System.out.println("Username exists.");
                 } else if (c == 3) {
-                    System.out.print("Course ID: "); int cid = readInt(sc);
+                    int cid = readUniqueId(sc, uni, "course");
                     System.out.print("Course Name: "); String cname = sc.nextLine();
                     System.out.print("Department: "); String cdept = sc.nextLine();
                     System.out.print("Credit: "); int credit = readInt(sc);
@@ -169,14 +180,17 @@ public class Main {
                     }
                 } else if (c == 8) {
                     System.out.print("Student ID to delete: "); int sid = readInt(sc);
+                    if (!confirmAction(sc, "Delete student with ID " + sid + "? (y/n): ")) { System.out.println("Cancelled."); continue; }
                     if (uni.deleteStudentById(sid)) System.out.println("Deleted.");
                     else System.out.println("Not found.");
                 } else if (c == 9) {
                     System.out.print("Teacher ID to delete: "); int tid = readInt(sc);
+                    if (!confirmAction(sc, "Delete teacher with ID " + tid + "? (y/n): ")) { System.out.println("Cancelled."); continue; }
                     if (uni.deleteTeacherById(tid)) System.out.println("Deleted.");
                     else System.out.println("Not found.");
                 } else if (c == 10) {
                     System.out.print("Course ID to delete: "); int cid = readInt(sc);
+                    if (!confirmAction(sc, "Delete course with ID " + cid + "? (y/n): ")) { System.out.println("Cancelled."); continue; }
                     if (uni.deleteCourseById(cid)) System.out.println("Deleted.");
                     else System.out.println("Not found.");
                 } else if (c == 11) {
@@ -274,6 +288,7 @@ public class Main {
         System.out.println("Session ended.");
     }
 
+    // helpers to safely read ints/doubles
     private static int readInt(Scanner sc) {
         while (true) {
             try {
@@ -293,6 +308,89 @@ public class Main {
             } catch (Exception e) {
                 System.out.print("Enter a valid number: ");
             }
+        }
+    }
+
+    private static int readUniqueId(Scanner sc, UniversitySystem uni, String entityType) {
+        while (true) {
+            if ("course".equalsIgnoreCase(entityType)) {
+                System.out.print("Enter academic year for the course (1-4): ");
+                int year;
+                try {
+                    String yline = sc.nextLine().trim();
+                    year = Integer.parseInt(yline);
+                    if (year < 1 || year > 4) { System.out.println("Year must be between 1 and 4."); continue; }
+                } catch (Exception e) {
+                    System.out.println("Enter a valid year (1-4).");
+                    continue;
+                }
+                int blockMin = year * 100;
+                int blockMax = year * 100 + 99;
+                System.out.print("Enter Course ID in range " + blockMin + "-" + blockMax + ": ");
+                String line = sc.nextLine().trim();
+                int id;
+                try {
+                    id = Integer.parseInt(line);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid number. Try again.");
+                    continue;
+                }
+                if (id < blockMin || id > blockMax) {
+                    System.out.println("Course ID must be within " + blockMin + "-" + blockMax + " for year " + year + ".");
+                    continue;
+                }
+                if (uni.isCourseIdTaken(id)) {
+                    System.out.println("That Course ID is already in use. Choose a different one.");
+                    continue;
+                }
+                return id;
+            } else {
+                System.out.print("Enter " + entityType + " ID (positive integer): ");
+                String line = sc.nextLine().trim();
+                int id;
+                try {
+                    id = Integer.parseInt(line);
+                    if (id <= 0) {
+                        System.out.println("ID must be a positive integer.");
+                        continue;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid number. Try again.");
+                    continue;
+                }
+
+                boolean inRange = false;
+                boolean taken = false;
+                if ("student".equalsIgnoreCase(entityType)) {
+                    inRange = uni.isStudentIdInRange(id);
+                    taken = uni.isStudentIdTaken(id);
+                    if (!inRange) System.out.println("Student IDs must be between 1000 and 1999.");
+                } else if ("teacher".equalsIgnoreCase(entityType)) {
+                    inRange = uni.isTeacherIdInRange(id);
+                    taken = uni.isTeacherIdTaken(id);
+                    if (!inRange) System.out.println("Teacher IDs must be between 2000 and 2999.");
+                } else {
+                    System.out.println("Unknown entity type for ID validation.");
+                    continue;
+                }
+
+                if (!inRange) continue;
+                if (taken) {
+                    System.out.println("That ID is already in use. Choose a different one.");
+                    continue;
+                }
+                return id;
+            }
+        }
+    }
+
+    private static boolean confirmAction(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String ans = sc.nextLine().trim().toLowerCase();
+            if (ans.equals("y") || ans.equals("yes")) return true;
+            if (ans.equals("n") || ans.equals("no")) return false;
+            System.out.println("Please answer 'y' or 'n'.");
         }
     }
 }
