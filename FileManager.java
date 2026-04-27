@@ -17,7 +17,7 @@ public class FileManager {
                 String line = sc.nextLine().trim();
                 if (line.isEmpty()) continue;
                 String[] parts = line.split(",", 5);
-                // id,name,email,blood,courseList
+                
                 int id = Integer.parseInt(parts[0]);
                 String name = parts[1];
                 String email = parts[2];
