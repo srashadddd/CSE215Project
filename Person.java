@@ -1,4 +1,6 @@
-public abstract class Person {
+import java.io.Serializable;
+
+public abstract class Person implements Serializable {
     private int id;
     private String name;
     private String email;
@@ -13,8 +15,16 @@ public abstract class Person {
 
     public abstract String getDetails();
 
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
-    public String getBloodGroup() { return bloodGroup; }
+    public int getId() {
+        return id;
+    }
+    public String getName() {
+        return name;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public String getBloodGroup() {
+        return bloodGroup;
+    }
 }
