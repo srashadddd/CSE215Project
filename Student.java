@@ -12,6 +12,8 @@ public class Student extends Person implements Evaluable {
     public void enrollCourse(Course c) { enrolledCourses.add(c); }
     public void dropCourse(Course c) { enrolledCourses.remove(c); }
 
+    public ArrayList<Course> getEnrolledCourses() { return enrolledCourses; }
+
     public double calculateGPA() { return gpa; }
 
     public String getDetails() {
