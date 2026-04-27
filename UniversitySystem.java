@@ -1,109 +1,166 @@
 import java.util.ArrayList;
-import java.util.Scanner;
 
-public class Main {
-    public static void main(String[] args) {
-        UniversitySystem uni = new UniversitySystem();
-        Scanner sc = new Scanner(System.in);
-        ArrayList<UserAccount> accounts = new ArrayList<>();
+public class UniversitySystem {
+    private ArrayList<Student> students;
+    private ArrayList<Teacher> teachers;
+    private ArrayList<Course> courses;
+    private ArrayList<UserAccount> accounts;
+    private FileManager fm;
 
-        boolean authenticated = false;
-        UserAccount currentUser = null;
+    public UniversitySystem() {
+        fm = new FileManager();
+        students = fm.loadStudents();
+        teachers = fm.loadTeachers();
+        courses = fm.loadCourses();
+        accounts = fm.loadAccounts();
 
-        while (!authenticated) {
-            System.out.println("\n=== Welcome to Smart University System ===");
-            System.out.println("1. Create Account");
-            System.out.println("2. Login");
-            System.out.print("Choose an option: ");
-            int option = sc.nextInt();
-            sc.nextLine();
-
-            if (option == 1) {
-                System.out.print("Enter new username: ");
-                String uname = sc.nextLine();
-                System.out.print("Enter new password: ");
-                String pass = sc.nextLine();
-                System.out.print("Enter role (student/teacher/admin): ");
-                String role = sc.nextLine();
-                accounts.add(new UserAccount(uname, pass, role));
-                System.out.println("Account created successfully. Please login.");
-            } 
-            else if (option == 2) {
-                System.out.print("Enter username: ");
-                String uname = sc.nextLine();
-                System.out.print("Enter password: ");
-                String pass = sc.nextLine();
-                for (UserAccount acc : accounts) {
-                    if (acc.getUsername().equals(uname) && acc.getPassword().equals(pass)) {
-                        authenticated = true;
-                        currentUser = acc;
-                        System.out.println("Login successful. Welcome " + uname + " (" + acc.getRole() + ")");
-                        break;
-                    }
-                }
-                if (!authenticated) {
-                    System.out.println("Invalid credentials. Try again.");
+        for (Course c : courses) {
+            int tid = c.getTeacherId();
+            Teacher t = getTeacherById(tid);
+            if (t != null) {
+                if (!t.getAssignedCourseIds().contains(c.getCourseId())) t.assignCourseId(c.getCourseId());
+            }
+            for (int sid : c.getStudentIds()) {
+                Student s = getStudentById(sid);
+                if (s != null) {
+                    if (!s.getEnrolledCourseIds().contains(c.getCourseId())) s.enrollCourseId(c.getCourseId());
                 }
             }
         }
+    }
 
-        boolean running = true;
-        while (running) {
-            if (currentUser.getRole().equals("admin")) {
-                System.out.println("\n=== Admin Menu ===");
-                System.out.println("1. Add Student");
-                System.out.println("2. Add Teacher");
-                System.out.println("3. Add Course");
-                System.out.println("4. Enroll Student in Course");
-                System.out.println("5. Update Student");
-                System.out.println("6. Update Teacher");
-                System.out.println("7. Update Course");
-                System.out.println("8. Delete Student");
-                System.out.println("9. Delete Teacher");
-                System.out.println("10. Delete Course");
-                System.out.println("11. Search Student");
-                System.out.println("12. Search Teacher");
-                System.out.println("13. Search Course");
-                System.out.println("14. Generate Report");
-                System.out.println("15. Logout");
-            } else if (currentUser.getRole().equals("teacher")) {
-                System.out.println("\n=== Teacher Menu ===");
-                System.out.println("1. Add Course");
-                System.out.println("2. Enroll Student in Course");
-                System.out.println("3. Generate Report");
-                System.out.println("4. Logout");
-            } else if (currentUser.getRole().equals("student")) {
-                System.out.println("\n=== Student Menu ===");
-                System.out.println("1. View My Details");
-                System.out.println("2. View My Courses");
-                System.out.println("3. Logout");
-            }
+    public boolean addStudentWithAccount(Student s, String username, String password) {
+        if (getAccountByUsername(username) != null) return false;
+        students.add(s);
+        accounts.add(new UserAccount(username, password, "student", s.getId()));
+        saveAll();
+        return true;
+    }
 
-            System.out.print("Choose an option: ");
-            int choice = sc.nextInt();
-            sc.nextLine();
+    public boolean addTeacherWithAccount(Teacher t, String username, String password) {
+        if (getAccountByUsername(username) != null) return false;
+        teachers.add(t);
+        accounts.add(new UserAccount(username, password, "teacher", t.getId()));
+        saveAll();
+        return true;
+    }
 
-            if (currentUser.getRole().equals("admin")) {
-                if (choice == 15) { running = false; }
-                else if (choice == 14) { uni.generateReport(); }
+    public boolean addAdminAccount(String username, String password) {
+        if (getAccountByUsername(username) != null) return false;
+        accounts.add(new UserAccount(username, password, "admin", -1));
+        saveAll();
+        return true;
+    }
+
+    public ArrayList<Student> getStudents() { return students; }
+    public ArrayList<Teacher> getTeachers() { return teachers; }
+    public ArrayList<Course> getCourses() { return courses; }
+    public ArrayList<UserAccount> getAccounts() { return accounts; }
+
+    public Student getStudentById(int id) {
+        for (Student s : students) if (s.getId() == id) return s;
+        return null;
+    }
+
+    public Teacher getTeacherById(int id) {
+        for (Teacher t : teachers) if (t.getId() == id) return t;
+        return null;
+    }
+
+    public Course getCourseById(int id) {
+        for (Course c : courses) if (c.getCourseId() == id) return c;
+        return null;
+    }
+
+    public UserAccount getAccountByUsername(String uname) {
+        for (UserAccount a : accounts) if (a.getUsername().equals(uname)) return a;
+        return null;
+    }
+
+    public void addCourse(Course c) {
+        courses.add(c);
+
+        Teacher t = getTeacherById(c.getTeacherId());
+        if (t != null) t.assignCourseId(c.getCourseId());
+        saveAll();
+    }
+
+    public boolean enrollStudentInCourse(int studentId, int courseId) {
+        Student s = getStudentById(studentId);
+        Course c = getCourseById(courseId);
+        if (s == null || c == null) return false;
+        s.enrollCourseId(courseId);
+        c.addStudentId(studentId);
+        saveAll();
+        return true;
+    }
+
+    public boolean unenrollStudentFromCourse(int studentId, int courseId) {
+        Student s = getStudentById(studentId);
+        Course c = getCourseById(courseId);
+        if (s == null || c == null) return false;
+        s.dropCourseId(courseId);
+        c.removeStudentId(studentId);
+        saveAll();
+        return true;
+    }
+
+    public boolean deleteStudentById(int id) {
+        Student s = getStudentById(id);
+        if (s == null) return false;
+
+        for (Course c : courses) c.removeStudentId(id);
+        students.remove(s);
+
+        UserAccount accToRemove = null;
+        for (UserAccount a : accounts) if (a.getRole().equals("student") && a.getLinkedId() == id) { accToRemove = a; break; }
+        if (accToRemove != null) accounts.remove(accToRemove);
+        saveAll();
+        return true;
+    }
+
+    public boolean deleteTeacherById(int id) {
+        Teacher t = getTeacherById(id);
+        if (t == null) return false;
+
+        for (Course c : courses) {
+            if (c.getTeacherId() == id) {
                 
-            } 
-            else if (currentUser.getRole().equals("teacher")) {
-                if (choice == 4) { running = false; }
-                else if (choice == 3) { uni.generateReport(); }
-                
-            } 
-            else if (currentUser.getRole().equals("student")) {
-                if (choice == 3) { running = false; }
-                else if (choice == 1) {
-                    System.out.println("My Details: " + currentUser.getUsername());
-                }
-                else if (choice == 2) {
-                    System.out.println("Courses enrolled will be shown here.");
-                }
             }
         }
+        
+        teachers.remove(t);
+        UserAccount accToRemove = null;
+        for (UserAccount a : accounts) if (a.getRole().equals("teacher") && a.getLinkedId() == id) { accToRemove = a; break; }
+        if (accToRemove != null) accounts.remove(accToRemove);
+        saveAll();
+        return true;
+    }
 
-        sc.close();
+    public boolean deleteCourseById(int id) {
+        Course c = getCourseById(id);
+        if (c == null) return false;
+
+        for (Student s : students) s.dropCourseId(id);
+        for (Teacher t : teachers) t.removeCourseId(id);
+        courses.remove(c);
+        saveAll();
+        return true;
+    }
+
+    public void saveAll() {
+        fm.saveStudents(students);
+        fm.saveTeachers(teachers);
+        fm.saveCourses(courses);
+        fm.saveAccounts(accounts);
+    }
+
+    public void generateReport() {
+        System.out.println("\n=== Students Report ===");
+        for (Student s : students) System.out.println(s.getDetails());
+        System.out.println("\n=== Teachers Report ===");
+        for (Teacher t : teachers) System.out.println(t.getDetails());
+        System.out.println("\n=== Courses Report ===");
+        for (Course c : courses) System.out.println(c.getDetails());
     }
 }
