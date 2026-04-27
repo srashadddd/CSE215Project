@@ -1,11 +1,14 @@
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) {
         UniversitySystem uni = new UniversitySystem();
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Welcome to Smart University Management System");
+        printPrecautions();
+
+        System.out.println("Welcome to Nigatola University Management System");
 
         boolean loggedIn = false;
         UserAccount current = null;
@@ -18,6 +21,7 @@ public class Main {
             int opt = readInt(sc);
 
             if (opt == 1) {
+                System.out.println("Username rules: min 4 chars, no spaces, unique.");
                 System.out.print("Username: "); String uname = sc.nextLine().trim();
                 if (!uni.isUsernameValid(uname)) {
                     System.out.println("Invalid username. Must be at least 4 characters and contain no spaces.");
@@ -31,6 +35,7 @@ public class Main {
                 System.out.print("Role (student/teacher/admin): "); String role = sc.nextLine().trim().toLowerCase();
                 if (role.equals("student")) {
                     int id = readUniqueId(sc, uni, "student");
+                    System.out.println("Note: do not use commas in this field.");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood Group: "); String blood = sc.nextLine();
@@ -40,6 +45,7 @@ public class Main {
                     else System.out.println("Failed to create account (username may exist).");
                 } else if (role.equals("teacher")) {
                     int id = readUniqueId(sc, uni, "teacher");
+                    System.out.println("Note: do not use commas in this field.");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood Group: "); String blood = sc.nextLine();
@@ -90,6 +96,7 @@ public class Main {
                 int c = readInt(sc);
                 if (c == 1) {
                     int id = readUniqueId(sc, uni, "student");
+                    System.out.println("Note: do not use commas in this field.");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood: "); String blood = sc.nextLine();
@@ -102,6 +109,7 @@ public class Main {
                     else System.out.println("Username exists.");
                 } else if (c == 2) {
                     int id = readUniqueId(sc, uni, "teacher");
+                    System.out.println("Note: do not use commas in this field.");
                     System.out.print("Name: "); String name = sc.nextLine();
                     System.out.print("Email: "); String email = sc.nextLine();
                     System.out.print("Blood: "); String blood = sc.nextLine();
@@ -116,6 +124,7 @@ public class Main {
                     else System.out.println("Username exists.");
                 } else if (c == 3) {
                     int cid = readUniqueId(sc, uni, "course");
+                    System.out.println("Note: do not use commas in this field.");
                     System.out.print("Course Name: "); String cname = sc.nextLine();
                     System.out.print("Department: "); String cdept = sc.nextLine();
                     System.out.print("Credit: "); int credit = readInt(sc);
@@ -136,6 +145,7 @@ public class Main {
                     Student s = uni.getStudentById(sid);
                     if (s == null) System.out.println("Not found.");
                     else {
+                        System.out.println("Note: do not use commas in this field.");
                         System.out.print("New name: "); String nn = sc.nextLine();
                         System.out.print("New email: "); String ne = sc.nextLine();
                         System.out.print("New blood: "); String nb = sc.nextLine();
@@ -151,6 +161,7 @@ public class Main {
                     Teacher t = uni.getTeacherById(tid);
                     if (t == null) System.out.println("Not found.");
                     else {
+                        System.out.println("Note: do not use commas in this field.");
                         System.out.print("New name: "); String nn = sc.nextLine();
                         System.out.print("New email: "); String ne = sc.nextLine();
                         System.out.print("New blood: "); String nb = sc.nextLine();
@@ -168,6 +179,7 @@ public class Main {
                     Course co = uni.getCourseById(cid);
                     if (co == null) System.out.println("Not found.");
                     else {
+                        System.out.println("Note: do not use commas in this field.");
                         System.out.print("New name: "); String nn = sc.nextLine();
                         System.out.print("New dept: "); String nd = sc.nextLine();
                         System.out.print("New credit: "); int nc = readInt(sc);
@@ -288,7 +300,28 @@ public class Main {
         System.out.println("Session ended.");
     }
 
-    // helpers to safely read ints/doubles
+    private static void printPrecautions() {
+        System.out.println("------------------------------------------------------------");
+        System.out.println(" Nigatola University Management System — Input Precautions");
+        System.out.println("------------------------------------------------------------");
+        System.out.println("ID rules:");
+        System.out.println("  • Student IDs: 1000 - 1999");
+        System.out.println("  • Teacher IDs: 2000 - 2999");
+        System.out.println("  • Course IDs by year: 100-199 (1st), 200-299 (2nd), 300-399 (3rd), 400-499 (4th)");
+        System.out.println();
+        System.out.println("Username rules:");
+        System.out.println("  • Minimum 4 characters; no spaces; must be unique");
+        System.out.println();
+        System.out.println("File and input cautions:");
+        System.out.println("  • Do NOT include commas in names, emails, departments, or other free-text fields.");
+        System.out.println("  • Data is stored in plain text files: students.txt, teachers.txt, courses.txt, accounts.txt");
+        System.out.println("  • Passwords are stored in plain text for this syllabus project — do not use real passwords.");
+        System.out.println();
+        System.out.println("When creating a course, you will be asked for the academic year first.");
+        System.out.println("Confirm destructive actions when prompted. Follow on-screen prompts carefully.");
+        System.out.println("------------------------------------------------------------");
+    }
+
     private static int readInt(Scanner sc) {
         while (true) {
             try {
