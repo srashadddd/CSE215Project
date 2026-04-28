@@ -21,11 +21,14 @@ public class Student extends Person implements Evaluable {
         return enrolledCourseIds;
     }
 
-    public double calculateGPA() {
-        return gpa;
+    public void setGpa(double gpa) {
+        this.gpa = gpa;
     }
 
+    public double getGpa() {
+        return gpa;
+    }
     public String getDetails() {
-        return "Student: " + getName() + " | Email: " + getEmail() + " | Blood Group: " + getBloodGroup() + " | ID: " + getId();
+        return "Student: " + getName() + " | Email: " + getEmail() + " | Blood Group: " + getBloodGroup() + " | ID: " + getId() + " | GPA: " +getGpa(); 
     }
 }
