@@ -5,6 +5,7 @@ public class UniversitySystem {
     private ArrayList<Teacher> teachers;
     private ArrayList<Course> courses;
     private ArrayList<UserAccount> accounts;
+    private ArrayList<Attendance> attendances;
     private FileManager fm;
 
     private static final int STUDENT_ID_MIN = 1000;
@@ -114,8 +115,12 @@ public class UniversitySystem {
         Student s = getStudentById(studentId);
         Course c = getCourseById(courseId);
         if (s == null || c == null) return false;
-        s.enrollCourseId(courseId);
-        c.addStudentId(studentId);
+        if (!s.getEnrolledCourseIds().contains(courseId)) {
+            s.enrollCourseId(courseId);
+        }
+        if (!c.getStudentIds().contains(studentId)) {
+            c.addStudentId(studentId);
+        }
         saveAll();
         return true;
     }
@@ -171,7 +176,15 @@ public class UniversitySystem {
         saveAll();
         return true;
     }
+    public boolean updateStudentGpa(int studentId, double gpa) {
+        Student s = getStudentById(studentId);
+        if (s == null) return false;
 
+        s.setGpa(gpa);
+        saveAll();
+        return true;
+    }
+    
     public void saveAll() {
         fm.saveStudents(students);
         fm.saveTeachers(teachers);
@@ -187,4 +200,12 @@ public class UniversitySystem {
         System.out.println("\n=== Courses Report ===");
         for (Course c : courses) System.out.println(c.getDetails());
     }
+
+	public ArrayList<Attendance> getAttendances() {
+		return attendances;
+	}
+
+	public void setAttendances(ArrayList<Attendance> attendances) {
+		this.attendances = attendances;
+	}
 }
