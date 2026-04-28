@@ -16,14 +16,16 @@ public class FileManager {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine().trim();
                 if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 5);
+                String[] parts = line.split(",", 6);
                 
                 int id = Integer.parseInt(parts[0]);
                 String name = parts[1];
                 String email = parts[2];
                 String blood = parts[3];
+                double gpa = Double.parseDouble(parts[4]);
                 Student s = new Student(id, name, email, blood);
-                if (parts.length == 5 && parts[4].length() > 0) {
+                s.setGpa(gpa);
+                if (parts.length == 6 && parts[5].length() > 0) {
                     String[] cids = parts[4].split("\\|");
                     for (String c : cids) {
                         if (c.length() > 0) s.enrollCourseId(Integer.parseInt(c));
@@ -43,9 +45,10 @@ public class FileManager {
             for (Student s : students) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(s.getId()).append(",")
-                  .append(s.getName()).append(",")
-                  .append(s.getEmail()).append(",")
-                  .append(s.getBloodGroup()).append(",");
+                .append(s.getName()).append(",")
+                .append(s.getEmail()).append(",")
+                .append(s.getBloodGroup()).append(",")
+                .append(s.getGpa()).append(",");
                 ArrayList<Integer> cids = s.getEnrolledCourseIds();
                 for (int i = 0; i < cids.size(); i++) {
                     if (i > 0) sb.append("|");
@@ -86,7 +89,9 @@ public class FileManager {
             }
             sc.close();
             fr.close();
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            System.out.println("Error loading data: " + e.getMessage());
+        }
         return list;
     }
 
